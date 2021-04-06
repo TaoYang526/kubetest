@@ -1,11 +1,12 @@
 package collector
 
 import (
+    "context"
     "fmt"
     "github.com/TaoYang526/kubetest/pkg/cache"
     "github.com/TaoYang526/kubetest/pkg/common"
     "github.com/TaoYang526/kubetest/pkg/kubeclient"
-    "github.com/cloudera/yunikorn-core/pkg/common/configs"
+    "github.com/apache/incubator-yunikorn-core/pkg/common/configs"
     "gopkg.in/yaml.v2"
     apiv1 "k8s.io/api/core/v1"
     "k8s.io/apimachinery/pkg/api/resource"
@@ -71,7 +72,7 @@ func CollectPodMetrics(namespace string, listOptions *metav1.ListOptions) []int 
 // replicas metrics of deployment: [desired, created, ready]
 func CollectDeploymentMetrics(namespace string, appName string) []int {
     deploymentsClient := kubeclient.GetClientSet().AppsV1().Deployments(namespace)
-    deployment, err := deploymentsClient.Get(appName, metav1.GetOptions{})
+    deployment, err := deploymentsClient.Get(context.TODO(), appName, metav1.GetOptions{})
     if deployment == nil || err != nil {
         fmt.Println("Failed to get deployment: ", err.Error())
         return []int{0, 0, 0}

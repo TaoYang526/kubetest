@@ -23,10 +23,10 @@ const (
     DefaultContainerImage = "nginx:1.12"
     DefaultContainerPortName = "http"
     DefaultSchedulerName = ""
-    DefaultResourceCPULimit = "20m"
+    DefaultResourceCPULimit = "10m"
     DefaultResourceMemLimit = "20Mi"
     DefaultResourceCPURequest = "10m"
-    DefaultResourceMemRequest = "10Mi"
+    DefaultResourceMemRequest = "20Mi"
 )
 
 type KubeDeployment struct {
@@ -159,6 +159,13 @@ func (d KubeDeployment) Build() *appsv1.Deployment {
                                     apiv1.ResourceMemory: resource.MustParse(d.resourceMemRequest),
                                 },
                             },
+                        },
+                    },
+                    Tolerations: []apiv1.Toleration{
+                        {
+                            Key: "node.kubernetes.io/unreachable",
+                            Effect: "NoSchedule",
+                            Operator: apiv1.TolerationOpExists,
                         },
                     },
                 },

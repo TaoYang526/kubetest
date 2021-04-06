@@ -19,7 +19,8 @@ const (
 )
 
 var (
-    PodNum = 50000
+    MaxWaitTime = 60 * time.Second
+    PodNum = 5000
     SelectPodLabels = map[string]string{cache.KeyApp: AppName}
 )
 
@@ -36,6 +37,7 @@ func main() {
         kubeclient.CreateDeployment(common.Namespace, deployment)
         beginTime := time.Now().Truncate(time.Second)
         // start monitor
+        startTime := time.Now()
         createMonitor := &monitor.Monitor{
             Name:           AppName + " create-monitor",
             Interval:       1,
@@ -43,7 +45,7 @@ func main() {
             SkipSameMerics: true,
             StopTrigger: func(m *monitor.Monitor) bool {
                 lastCp := m.GetLastCheckPoint()
-                if lastCp.MetricValues[2] == PodNum {
+                if lastCp.MetricValues[2] == PodNum || time.Now().After(startTime.Add(MaxWaitTime)) {
                     // stop monitor when readyReplicas equals PodNum
                     return true
                 }
@@ -54,7 +56,7 @@ func main() {
         // wait util this deployment is running successfully
         createMonitor.WaitForStopped()
         // calculate distribution of pod start times
-        endTime := time.Now()
+        endTime := time.Now().Truncate(time.Second)
         podStartTimes := collector.CollectPodInfo(common.Namespace,
             kubeclient.GetListOptions(SelectPodLabels), collector.ParsePodStartTime)
         podStartTimeDistribution := collector.AnalyzeTimeDistribution(beginTime, endTime, podStartTimes)
@@ -66,7 +68,7 @@ func main() {
 
         // delete deployment
         kubeclient.DeleteDeployment(common.Namespace, AppName)
-        // make sure all related pods are cleaned up
+        //make sure all related pods are cleaned up
         monitor.WaitUtilAllMetricsAreCleanedUp(collectDeploymentMetrics)
     }
 

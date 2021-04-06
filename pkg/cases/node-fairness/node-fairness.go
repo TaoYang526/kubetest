@@ -21,7 +21,7 @@ const (
 
 var (
     PodMem = "190Mi"
-    PodNum = 40000
+    PodNum = 2000
     SelectPodLabels = map[string]string{cache.KeyApp: AppName}
     FieldSelect = map[string]string{}
     nodeAllocatableResources = kubeclient.GetHollowNodeAllocatableResources()

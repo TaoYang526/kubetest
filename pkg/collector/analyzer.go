@@ -10,15 +10,21 @@ import (
 func AnalyzeTimeDistribution(beginTime time.Time, endTime time.Time, ifSlice []interface{}) []int {
     maxSeconds := int(math.Ceil(endTime.Sub(beginTime).Seconds()))
     distribution := make([]int, maxSeconds+1)
+    maxFlag := 0
     for _, ifItem := range ifSlice {
         if columns,ok := ifItem.([]interface{}); ok {
             podStartTime := common.ConvertToTime(beginTime, endTime, columns[0])
             seconds := int(math.Ceil(podStartTime.Sub(beginTime).Seconds()))
             distribution[seconds] += 1
+            if seconds > maxFlag {
+                maxFlag = seconds
+                fmt.Printf("-------->createTime:%v, startTime:%v, podName:%v, nodeName:%v\n", columns[1], columns[0], columns[2], columns[3])
+            }
         } else {
             panic(fmt.Errorf("Error: type of data items is not []interface{}, data: %v ", ifItem))
         }
     }
+    fmt.Printf("------>maxSeconds: %d, distribution:%v", maxSeconds, distribution)
     lastNonZeroIndex := len(distribution) -1
     for i := len(distribution) - 1; i >= 0; i-- {
         if distribution[i] != 0 {
@@ -45,10 +51,15 @@ func AnalyzeResourceDistribution(beginTime time.Time, endTime time.Time, ifSlice
     maxSeconds := int(math.Ceil(endTime.Sub(beginTime).Seconds()))
     // parse pod infos
     sortedPodInfos := make([][][]interface{}, maxSeconds)
+    maxFlag := 0
     for _, ifItem := range ifSlice {
         if columns,ok := ifItem.([]interface{}); ok {
             podStartTime := common.ConvertToTime(beginTime, endTime, columns[0])
             seconds := int(math.Ceil(podStartTime.Sub(beginTime).Seconds()))
+            if seconds > maxFlag {
+                maxFlag = seconds
+                fmt.Printf("-------->createTime:%v, startTime:%v, podName:%v\n", columns[1], columns[0], columns[2])
+            }
             sortedPodInfos[seconds] = append(sortedPodInfos[seconds], columns)
         } else {
             panic(fmt.Errorf("Error: type of data items is not []interface{}, data: %v ", columns))

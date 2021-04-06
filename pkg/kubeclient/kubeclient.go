@@ -1,6 +1,7 @@
 package kubeclient
 
 import (
+    "context"
     "flag"
     "fmt"
     "github.com/TaoYang526/kubetest/pkg/common"
@@ -45,15 +46,15 @@ func GetListOptions(selectLabels map[string]string) *metav1.ListOptions{
 }
 
 func GetPods(namespace string, listOptions *metav1.ListOptions) (*apiv1.PodList, error) {
-    return clientSet.CoreV1().Pods(namespace).List(*listOptions)
+    return clientSet.CoreV1().Pods(namespace).List(context.TODO(), *listOptions)
 }
 
 func GetNodes(listOptions *metav1.ListOptions) (*apiv1.NodeList, error) {
-    return clientSet.CoreV1().Nodes().List(*listOptions)
+    return clientSet.CoreV1().Nodes().List(context.TODO(), *listOptions)
 }
 
 func GetConfigMap(namespace string, name string, getOptions *metav1.GetOptions) (*apiv1.ConfigMap, error) {
-    return clientSet.CoreV1().ConfigMaps(namespace).Get(name, *getOptions)
+    return clientSet.CoreV1().ConfigMaps(namespace).Get(context.TODO(), name, *getOptions)
 }
 
 func GetClientSet() *kubernetes.Clientset {
@@ -83,17 +84,26 @@ func GetHollowNodeAllocatableResources() map[string]int64 {
 func CreateDeployment(namespace string, deployment *appsv1.Deployment) {
     deploymentsClient := clientSet.AppsV1().Deployments(namespace)
     fmt.Println("Creating deployment...")
-    result, err := deploymentsClient.Create(deployment)
+    result, err := deploymentsClient.Create(context.TODO(), deployment, metav1.CreateOptions{})
     if err != nil {
         panic(err)
     }
     fmt.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
 }
 
+func GetDeployment(namespace, appName string) *appsv1.Deployment {
+    deploymentsClient := clientSet.AppsV1().Deployments(namespace)
+    if deployment, err := deploymentsClient.Get(context.TODO(), appName, metav1.GetOptions{}); err!=nil {
+        panic(err)
+    } else {
+        return deployment
+    }
+}
+
 func DeleteDeployment(namespace, appName string) {
     deploymentsClient := clientSet.AppsV1().Deployments(namespace)
     deletePolicy := metav1.DeletePropagationForeground
-    if err := deploymentsClient.Delete(appName, &metav1.DeleteOptions{
+    if err := deploymentsClient.Delete(context.TODO(), appName, metav1.DeleteOptions{
         PropagationPolicy: &deletePolicy,
     }); err != nil {
         panic(err)

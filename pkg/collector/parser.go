@@ -4,7 +4,7 @@ import (
     "fmt"
     "github.com/TaoYang526/kubetest/pkg/cache"
     "github.com/TaoYang526/kubetest/pkg/common"
-    "github.com/cloudera/yunikorn-core/pkg/common/configs"
+    "github.com/apache/incubator-yunikorn-core/pkg/common/configs"
     apiv1 "k8s.io/api/core/v1"
     "k8s.io/apimachinery/pkg/api/resource"
 )
@@ -12,11 +12,11 @@ import (
 // columns of result item: podStartTime
 func ParsePodStartTime(pod *apiv1.Pod) []interface{} {
     if pod.Status.StartTime == nil {
-        fmt.Printf("Pod without start time: %v\n", pod)
+        //fmt.Printf("Pod without start time: %v\n", pod)
         return nil
     }
     //fmt.Printf("----->node: %v, startTime: %v \n", pod.Name, pod.Status.StartTime)
-    return []interface{}{pod.Status.StartTime.Time}
+    return []interface{}{pod.Status.StartTime.Time, pod.GetCreationTimestamp(), pod.Name, pod.Spec.NodeName}
 }
 
 // columns of result item: podStartTime, resourceValue, additionalInfo

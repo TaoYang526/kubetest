@@ -15,6 +15,10 @@ const (
     YSConfigMapQueuesResourceMemKey = "memory"
     YSName                          = "yunikorn"
 
+    // constants for ak8s scheduler
+    K8SName = "default-scheduler"
+    AK8SName = "ak8s-ee-scheduler"
+
     // constants for chart
     ChartWidth    = 6 * vg.Inch
     ChartHeight   = 6 * vg.Inch
@@ -22,6 +26,6 @@ const (
 )
 
 var (
-    SchedulerNames = []string{YSName, ""}
-    SchedulerAlias = map[string]string{YSName: YSName, "": "k8s"}
+    SchedulerNames = []string{YSName, K8SName, AK8SName}
+    SchedulerAlias = map[string]string{YSName: YSName, K8SName: K8SName, AK8SName: AK8SName}
 )
